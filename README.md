@@ -23,6 +23,40 @@
 
 ---
 
+## 🏗️ 系统架构
+
+### 高层架构
+
+```mermaid
+flowchart LR
+    User([用户 CLI]) --> Review["review.py\n主入口"]
+
+    subgraph Core [核心引擎]
+        Review --> Search["检索模块"]
+        Review --> Score["评分模块"]
+        Review --> LLM["LLM 模块"]
+        Review --> Export["导出模块"]
+    end
+
+    subgraph Sources [数据源]
+        Search --> ArXiv["arXiv API/Web"]
+        Search --> SemSch["Semantic Scholar"]
+    end
+
+    subgraph LLMProviders [LLM 后端]
+        LLM --> Gw["Gateway API\n(首选)"]
+        LLM --> Ds["Dashscope API\n(备用)"]
+        LLM --> Rule["规则 Fallback"]
+    end
+
+    subgraph Storage [本地存储]
+        Export --> Bib["BibTeX 文件"]
+        Export --> Report["研究报告"]
+        Score --> CCF_DB["CCF 评级 DB\n422 venues"]
+    end
+```
+---
+
 ## 🚀 快速开始
 
 ### 安装
@@ -108,7 +142,79 @@ python scripts/config.py --default_n 20 --default_k 3 --min_year 2024 --authorit
 
 ---
 
-## 🛡️ 错误处理
+## � 运行环境
+
+### 环境要求
+
+| 依赖             | 版本要求 | 说明                      |
+| ---------------- | -------- | ------------------------- |
+| Python           | ≥ 3.10   | 核心运行环境              |
+| `requests`       | ≥ 2.28   | HTTP 请求                 |
+| `beautifulsoup4` | ≥ 4.12   | HTML 解析（网页爬取回退） |
+| `lxml`           | ≥ 4.9    | XML/HTML 解析加速         |
+
+### 部署方式
+
+#### 方式一：OpenClaw 安装（推荐）
+
+```bash
+# 一键安装
+openclaw skills install paper-review-pro
+
+# 运行检索
+cd ~/.openclaw/workspace/skills/paper-review-pro
+python scripts/review.py --query "your query"
+```
+
+#### 方式二：手动部署
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/bpluo/Paper-Review-Pro.git
+cd Paper-Review-Pro
+
+# 2. 创建虚拟环境（推荐）
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
+# 3. 安装依赖
+pip install requests beautifulsoup4 lxml
+
+# 4. 运行
+python scripts/review.py --query "your query"
+```
+
+### LLM 配置（可选）
+
+如需 AI 摘要和扩展检索功能，需要配置 LLM 后端。
+
+**方式 A：OpenClaw Gateway（推荐）**
+
+```bash
+# gateway_url 默认指向 http://localhost:14940
+# 确保 Gateway 服务已启动
+```
+
+**方式 B：Dashscope（阿里云通义千问）**
+
+```json
+{
+  "llm": {
+    "provider": "dashscope",
+    "api_key": "sk-xxxx",
+    "model": "qwen-plus"
+  }
+}
+```
+
+> 💡 未配置 LLM 时，系统自动降级为规则 Fallback，核心检索功能不受影响。
+
+---
+
+## �🛡️ 错误处理
 
 | 层级     | 回退链                                |
 | -------- | ------------------------------------- |
@@ -120,7 +226,39 @@ python scripts/config.py --default_n 20 --default_k 3 --min_year 2024 --authorit
 
 ---
 
-## 📖 参考文档
+## � 项目结构
+
+```
+paper-review-pro/
+├── scripts/
+│   ├── review.py                  # 🔧 主入口 — 参数解析 + 流程编排
+│   ├── config.py                  # ⚙️ 配置管理 CLI
+│   ├── test_publication_status.py # 🧪 CCF 评级测试套件
+│   └── core/
+│       ├── __init__.py
+│       ├── arxiv.py               # 📡 arXiv 检索（API + 网页回退）
+│       ├── semantic_scholar.py    # 📡 Semantic Scholar 检索
+│       ├── publication_status.py  # 🏆 CCF 评级数据库（422 venues）
+│       ├── scoring.py             # 📊 综合评分系统
+│       ├── llm_integration.py     # 🤖 LLM 集成（Gateway/Dashscope/Fallback）
+│       ├── bibtex.py              # 📑 BibTeX 导出
+│       ├── report_generator.py    # 📋 研究报告生成
+│       └── utils.py               # 🛠️ 工具函数（TimeoutMonitor 等）
+├── reference/                     # 📖 详细模块文档
+│   ├── LLM_INTEGRATION.md
+│   ├── BIBTEX_EXPORT.md
+│   ├── PUBLICATION_STATUS.md
+│   ├── SCORING_SYSTEM.md
+│   └── BUGFIXES.md
+├── config.json                    # 默认配置文件
+├── SKILL.md                       # OpenClaw 技能元数据
+├── CHANGELOG.md                   # 更新日志
+└── LICENSE                        # MIT-0
+```
+
+---
+
+## �📖 参考文档
 
 | 文档                              | 说明                           |
 | --------------------------------- | ------------------------------ |
