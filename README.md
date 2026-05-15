@@ -142,7 +142,7 @@ python scripts/config.py --default_n 20 --default_k 3 --min_year 2024 --authorit
 
 ---
 
-## � 运行环境
+## 运行环境
 
 ### 环境要求
 
@@ -214,7 +214,7 @@ python scripts/review.py --query "your query"
 
 ---
 
-## �🛡️ 错误处理
+##�🛡️ 错误处理
 
 | 层级     | 回退链                                |
 | -------- | ------------------------------------- |
@@ -226,7 +226,7 @@ python scripts/review.py --query "your query"
 
 ---
 
-## � 项目结构
+##  项目结构
 
 ```
 paper-review-pro/
@@ -258,7 +258,7 @@ paper-review-pro/
 
 ---
 
-## �📖 参考文档
+##  参考文档
 
 | 文档                              | 说明                           |
 | --------------------------------- | ------------------------------ |
